@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserSignUp } from './dto/user-signup.dto';
+import { compare, hash } from 'bcrypt'
+import { UserSignIn } from './dto/user-signin.dto';
+import { sign } from 'jsonwebtoken';
 
 @Injectable()
 export class UsersService {
@@ -13,13 +16,34 @@ export class UsersService {
     private usersRepository: Repository<UserEntity>
   ) { }
 
-  async create(userSignUp: UserSignUp): Promise<UserEntity> {
-    const user = this.usersRepository.create(userSignUp);
-    return await this.usersRepository.save(user);
+  async signUp(userSignUp: UserSignUp): Promise<UserEntity> {
+    const userExists = await this.findUserByEmail(userSignUp.email)
+    if (userExists)
+      throw new BadRequestException("Email is not available!")
+
+    userSignUp.password = await hash(userSignUp.password, 10)
+    let user = this.usersRepository.create(userSignUp);
+    user = await this.usersRepository.save(user);
+    delete user.password;
+    return user
+  }
+
+  async signIn(userSignIn: UserSignIn): Promise<UserEntity> {
+    const userExists = await this.usersRepository.createQueryBuilder('users').addSelect('users.password')
+      .where('users.email=:email', { email: userSignIn.email }).getOne()
+    if (!userExists)
+      throw new BadRequestException("Email is not available!")
+
+    const matchPassword = await compare(userSignIn.password, userExists.password)
+    if (!matchPassword)
+      throw new BadRequestException("The password was entered incorrectly!")
+
+    delete userExists.password;
+    return userExists;
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.usersRepository.find();
   }
 
   findOne(id: number) {
@@ -33,4 +57,15 @@ export class UsersService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+  async findUserByEmail(email: string) {
+    return await this.usersRepository.findOneBy({ email })
+  }
+
+  async accessToken(user: UserEntity) {
+    return sign({ id: user.id, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET_KEY,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRE_TIME });
+  }
+
 }
