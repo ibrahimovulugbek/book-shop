@@ -13,7 +13,7 @@ export class UsersService {
 
   constructor(
     @InjectRepository(UserEntity)
-    private usersRepository: Repository<UserEntity>
+    private readonly usersRepository: Repository<UserEntity>
   ) { }
 
   async signUp(userSignUp: UserSignUp): Promise<UserEntity> {

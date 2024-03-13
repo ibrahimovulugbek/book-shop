@@ -1,5 +1,6 @@
+import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/utility/enums/user-roles.enum";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 
 @Entity('users')
 export class UserEntity {
@@ -10,7 +11,7 @@ export class UserEntity {
     @Column()
     name: string
 
-    @Column({ unique: true })
+    @Column({ unique: true})
     email: string
 
     @Column({ select: false })
@@ -24,4 +25,7 @@ export class UserEntity {
 
     @CreateDateColumn()
     updatedAt: Timestamp;
+
+    @OneToMany(() => CategoryEntity, (cat) => cat.addedBy)
+    categories:CategoryEntity[]
 }
