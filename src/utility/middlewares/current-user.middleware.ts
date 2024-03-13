@@ -13,8 +13,6 @@ declare global {
     }
 }
 
-
-
 @Injectable()
 export class CurrentUserMiddleware implements NestMiddleware {
     constructor(
@@ -26,16 +24,21 @@ export class CurrentUserMiddleware implements NestMiddleware {
         if (!authHeader || isArray(authHeader) || !authHeader.startsWith('Bearer ')) {
             const currentUser = null;
             next();
+            return;
         } else {
-            const token = authHeader.split(' ')[1]
-            const { id } = <JwtPayload>verify(token, process.env.ACCESS_TOKEN_SECRET_KEY)
-            const currentUser = await this.userService.findOne(+id);
-            req.currentUser = currentUser;
+            try {
+                const token = authHeader.split(' ')[1]
+                const { id } = <JwtPayload>verify(token, process.env.ACCESS_TOKEN_SECRET_KEY)
+                const currentUser = await this.userService.findOne(+id);
+                req.currentUser = currentUser;
+                next();
+            } catch (error) {
+                const currentUser = null;
+                console.log(error);
+                next()
+            }
 
-            next();
         }
-
-
     }
 }
 
