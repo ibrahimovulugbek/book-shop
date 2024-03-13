@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSignUp } from './dto/user-signup.dto';
 import { UserEntity } from './entities/user.entity';
 import { UserSignIn } from './dto/user-signin.dto';
 import { CurrentUser } from 'src/utility/decorator/current-user.decorator';
+import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
+import { Roles } from 'src/utility/enums/user-roles.enum';
+import { AuthorizationGuard } from 'src/utility/guards/authorization.guard';
 
 @Controller('/users')
 export class UsersController {
@@ -29,30 +32,37 @@ export class UsersController {
     return { user, accessToken }
   }
 
-  @Get('/all')
-  async findAll(): Promise<UserEntity[]> {
-    return await this.usersService.findAll();
-  }
-
-  @Get('/:id')
+  @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.USER, Roles.ADMIN]))
+  @Get('/single/:id')
   findOne(
     @Param('id', ParseIntPipe) id: number
   ): Promise<UserEntity> {
     return this.usersService.findOne(id);
   }
 
+  @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.ADMIN]))
+  @Get('/all')
+  async findAll(): Promise<UserEntity[]> {
+    return await this.usersService.findAll();
+  }
+
+  @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.USER]))
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() update: UpdateUserDto) {
     return this.usersService.update(id, update);
   }
 
+  @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.ADMIN]))
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(+id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Get('/me')
-  getProfile(@CurrentUser() currentUser: UserEntity) {
+  getProfile(
+    @CurrentUser() currentUser: UserEntity
+  ) {
     return currentUser;
   }
 
