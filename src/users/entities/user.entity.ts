@@ -1,4 +1,4 @@
-import { Roles } from "src/utility/user-roles.enum";
+import { Roles } from "src/utility/enums/user-roles.enum";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 
 @Entity('users')
