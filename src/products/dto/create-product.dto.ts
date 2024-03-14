@@ -15,7 +15,7 @@ export class CreateProductDto {
     @IsPositive({ message: "Price should be positive number" })
     price: number
 
-    @IsNotEmpty({ message: "Stock must not be empty!!!" })
+    // @IsNotEmpty({ message: "Stock must not be empty!!!" })
     @IsNumber({ maxDecimalPlaces: 2 }, { message: "Price should be number and max decimal precission 2" })
     @IsPositive({ message: "Stock should be positive number" })
     stock: number
