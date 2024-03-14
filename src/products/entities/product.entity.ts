@@ -1,6 +1,6 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { UserEntity } from "src/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 
 @Entity({ name: 'products' })
 export class ProductEntity {
