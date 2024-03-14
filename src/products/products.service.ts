@@ -24,12 +24,29 @@ export class ProductsService {
     return await this.productRepository.save(newProduct);
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll(): Promise<ProductEntity[]> {
+    return await this.productRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: number): Promise<ProductEntity> {
+    return await this.productRepository.findOne({
+      where: { id: id },
+      relations: {
+        addedBy: true,
+        category: true
+      },
+      select: {
+        addedBy: {
+          id: true,
+          name: true,
+          email: true,
+        },
+        category: {
+          id: true,
+          title: true,
+        }
+      }
+    });
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
