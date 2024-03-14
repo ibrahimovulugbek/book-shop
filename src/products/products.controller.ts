@@ -7,7 +7,6 @@ import { AuthorizationGuard } from 'src/utility/guards/authorization.guard';
 import { Roles } from 'src/utility/enums/user-roles.enum';
 import { CurrentUser } from 'src/utility/decorator/current-user.decorator';
 import { UserEntity } from 'src/users/entities/user.entity';
-import { cursorTo } from 'readline';
 import { ProductEntity } from './entities/product.entity';
 
 @Controller('products')
@@ -35,13 +34,20 @@ export class ProductsController {
     return await this.productsService.findOne(id);
   }
 
+  @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.ADMIN]))
   @Patch('/:id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(+id, updateProductDto);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() update: UpdateProductDto,
+    @CurrentUser() currentUser: UserEntity
+  ): Promise<ProductEntity> {
+    return await this.productsService.update(id, update, currentUser);
   }
 
   @Delete('/:id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    return await this.productsService.remove(+id);
   }
 }
