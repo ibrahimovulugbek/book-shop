@@ -6,7 +6,6 @@ import { ProductEntity } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoriesService } from 'src/categories/categories.service';
 import { UserEntity } from 'src/users/entities/user.entity';
-import { find } from 'rxjs';
 
 @Injectable()
 export class ProductsService {
@@ -30,7 +29,7 @@ export class ProductsService {
   }
 
   async findOne(id: number): Promise<ProductEntity> {
-    return await this.productRepository.findOne({
+    const product = await this.productRepository.findOne({
       where: { id: id },
       relations: {
         addedBy: true,
@@ -48,6 +47,11 @@ export class ProductsService {
         }
       }
     });
+
+    if (!product)
+      throw new NotFoundException("Product not found!!!")
+
+    return product;
   }
 
   async update(id: number, update: Partial<UpdateProductDto>, currentUser: UserEntity): Promise<ProductEntity> {
