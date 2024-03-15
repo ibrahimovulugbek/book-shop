@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -12,7 +12,7 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) { }
 
   @UseGuards(AuthenticationGuard)
-  @Post()
+  @Post('/')
   async create(
     @Body() create: CreateReviewDto,
     @CurrentUser() currentUser: UserEntity
@@ -20,23 +20,36 @@ export class ReviewsController {
     return await this.reviewsService.create(create, currentUser);
   }
 
-  @Get()
-  findAll() {
-    return this.reviewsService.findAll();
+  @Get('/')
+  async findAll(): Promise<ReviewEntity[]> {
+    return await this.reviewsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reviewsService.findOne(+id);
+  @Get('/productId')
+  async findAllByProduct(
+    @Body('productId', ParseIntPipe) productId: number
+  ): Promise<ReviewEntity[]> {
+    return await this.reviewsService.findAllByProduct(productId);
+  }
+
+  @Get('/single/:id')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<ReviewEntity> {
+    return await this.reviewsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewsService.update(+id, updateReviewDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() update: UpdateReviewDto
+  ) {
+    return this.reviewsService.update(id, update);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewsService.remove(+id);
+  remove(
+    @Param('id', ParseIntPipe) id: number) {
+    return this.reviewsService.remove(id);
   }
 }
