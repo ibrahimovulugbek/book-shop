@@ -74,8 +74,12 @@ export class ReviewsService {
     return `This action updates a #${id} review`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} review`;
+  async remove(id: number) {
+    const review = await this.reviewRepository.findOneBy({id})
+    if (!review) {
+      throw new NotFoundException("Review not found!!!");
+    }
+    return await this.reviewRepository.remove(review);
   }
 
   async findByUserAndProduct(userId: number, productId: number) {

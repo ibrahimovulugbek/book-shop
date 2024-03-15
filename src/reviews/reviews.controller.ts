@@ -6,6 +6,8 @@ import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
 import { CurrentUser } from 'src/utility/decorator/current-user.decorator';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { ReviewEntity } from './entities/review.entity';
+import { AuthorizationGuard } from 'src/utility/guards/authorization.guard';
+import { Roles } from 'src/utility/enums/user-roles.enum';
 
 @Controller('reviews')
 export class ReviewsController {
@@ -39,7 +41,7 @@ export class ReviewsController {
     return await this.reviewsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('/:id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() update: UpdateReviewDto
@@ -47,9 +49,10 @@ export class ReviewsController {
     return this.reviewsService.update(id, update);
   }
 
-  @Delete(':id')
-  remove(
+  @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.ADMIN]))
+  @Delete('/:id')
+  async remove(
     @Param('id', ParseIntPipe) id: number) {
-    return this.reviewsService.remove(id);
+    return await this.reviewsService.remove(id);
   }
 }
