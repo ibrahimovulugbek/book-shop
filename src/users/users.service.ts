@@ -58,7 +58,19 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
+  async remove(id: number, softDelete: boolean) {
+    const user = await this.usersRepository.findOneBy({ id })
+    if (!user)
+      throw new NotFoundException("User not found!");
+
+    if (softDelete) {
+      return await this.usersRepository.softDelete(id)
+    } else {
+      return await this.usersRepository.remove(user);
+      // return await this.usersRepository.delete(id);
+    }
+
+
     return `This action removes a #${id} user`;
   }
 

@@ -54,8 +54,11 @@ export class UsersController {
 
   @UseGuards(AuthenticationGuard, AuthorizationGuard([Roles.ADMIN]))
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(+id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('softDelete') softDelete: boolean
+  ) {
+    return await this.usersService.remove(id, softDelete);
   }
 
   @UseGuards(AuthenticationGuard)
