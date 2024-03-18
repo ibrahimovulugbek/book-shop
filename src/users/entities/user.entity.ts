@@ -28,9 +28,11 @@ export class UserEntity {
     @CreateDateColumn()
     updatedAt: Timestamp;
 
-    @DeleteDateColumn()
-    // deletedAt: Timestamp
-    deletedAt: Date
+    @Column()
+    deletedAt?: Date
+
+    @Column({ default: Status.ACTIVE })
+    status: Status
 
     @OneToMany(() => CategoryEntity, (cat) => cat.addedBy)
     categories: CategoryEntity[]
