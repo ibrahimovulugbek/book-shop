@@ -2,7 +2,8 @@ import { CategoryEntity } from "src/categories/entities/category.entity";
 import { ProductEntity } from "src/products/entities/product.entity";
 import { ReviewEntity } from "src/reviews/entities/review.entity";
 import { Roles } from "src/utility/enums/user-roles.enum";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Status } from "src/utility/enums/user-status.enum";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 
 @Entity('users')
 export class UserEntity {
@@ -28,7 +29,7 @@ export class UserEntity {
     @CreateDateColumn()
     updatedAt: Timestamp;
 
-    @Column()
+    @Column({nullable: true})
     deletedAt?: Date
 
     @Column({ default: Status.ACTIVE })
