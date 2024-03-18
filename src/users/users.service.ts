@@ -7,6 +7,7 @@ import { UserSignUp } from './dto/user-signup.dto';
 import { compare, hash } from 'bcrypt'
 import { UserSignIn } from './dto/user-signin.dto';
 import { sign } from 'jsonwebtoken';
+import { Status } from 'src/utility/enums/user-status.enum';
 
 @Injectable()
 export class UsersService {
@@ -17,15 +18,15 @@ export class UsersService {
   ) { }
 
   async signUp(userSignUp: UserSignUp): Promise<UserEntity> {
-    const userExists = await this.findUserByEmail(userSignUp.email)
+    const userExists = await this.usersRepository.findOneBy({ email: userSignUp.email })
     if (userExists)
       throw new BadRequestException("Email is not available!")
 
     userSignUp.password = await hash(userSignUp.password, 10)
-    let user = this.usersRepository.create(userSignUp);
-    user = await this.usersRepository.save(user);
-    delete user.password;
-    return user
+    const user = this.usersRepository.create(userSignUp);
+    const savedUser = await this.usersRepository.save(user);
+    delete savedUser.password;
+    return savedUser;
   }
 
   async signIn(userSignIn: UserSignIn): Promise<UserEntity> {
@@ -54,28 +55,32 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
+  /**
+ * id va softDelete kirib keladi 
+ * softDelete defolt holatda true boladi
+ * deletedAt va status degan propertysi bo'ladi
+ * user o'chirilganda (softdelete=true) deletedAt ga o'chirilgan sana, statusga deleted degan status joylashtiriladi
+ * user o'chirilganda (softdelete=false) user butunlay o'chirib yuboriladi 
+ * 
+ */
   async remove(id: number, softDelete: boolean) {
+    if (softDelete == null) softDelete = true
     const user = await this.usersRepository.findOneBy({ id })
     if (!user)
       throw new NotFoundException("User not found!");
 
     if (softDelete) {
-      return await this.usersRepository.softDelete(id)
+      user.deletedAt = new Date()
+      user.status = Status.PASSIVE
+      return user;
     } else {
+      console.log("ishladi!")
       return await this.usersRepository.remove(user);
-      // return await this.usersRepository.delete(id);
     }
-
-
-    return `This action removes a #${id} user`;
-  }
-
-  async findUserByEmail(email: string) {
-    return await this.usersRepository.findOneBy({ email })
   }
 
   async accessToken(user: UserEntity) {

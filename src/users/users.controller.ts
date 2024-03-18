@@ -56,7 +56,7 @@ export class UsersController {
   @Delete(':id')
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Body('softDelete') softDelete: boolean
+    @Body('softDelete') softDelete: boolean 
   ) {
     return await this.usersService.remove(id, softDelete);
   }
