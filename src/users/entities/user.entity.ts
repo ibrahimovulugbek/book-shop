@@ -29,10 +29,10 @@ export class UserEntity {
     @CreateDateColumn()
     updatedAt: Timestamp;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     deletedAt?: Date
 
-    @Column({ default: Status.ACTIVE })
+    @Column({ type: 'enum', enum: Status, default: Status.ACTIVE })
     status: Status
 
     @OneToMany(() => CategoryEntity, (cat) => cat.addedBy)
