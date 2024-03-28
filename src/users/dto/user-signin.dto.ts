@@ -1,8 +1,9 @@
 import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 
 export class UserSignIn {
+    
     @IsNotEmpty({ message: "Email bo'sh bo'lmasligi kerak!" })
-    @IsEmail({}, { message: "Emmailingizni to'g'ri kiriting!" })
+    @IsEmail({}, { message: "Emailingizni to'g'ri kiriting!" })
     email: string;
 
     @IsNotEmpty({ message: "Password bo'sh bo'lmasligi kerak!" })
